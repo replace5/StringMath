@@ -4,11 +4,6 @@
 		return (String(num) + '.').split('.')[1].length;
 	}
 
-	// 获取整数位数
-	function get_integer_length() {
-		return String(num).split('.')[0].length;
-	}
-
 	// 补全小数位数
 	function pad_decimal(num, length) {
 		num = String(num);
@@ -27,20 +22,16 @@
 		return num.join('.');
 	}
 
-	// 补全整数位数
-	function pad_integer(num, length) {
-		num = String(num);
-		num = num.split('.');
-
-		while (num[0].length < length) {
-			num[0] = '0' + num[0];
-		}
-
-		return num.join('.');
+	// 清除小数点
+	function clear_decimal_point(str_num) {
+		return String(str_num).split('.').slice(0, 2).join('');
 	}
 
 	// 清除多余的0
 	function clear0(str_num) {
+		var str_symbol = StringSymbol.get(str_num);
+		str_num = StringSymbol.clear(str_num);
+
 		// 清除左侧的0
 		while(str_num.charAt(0) === '0' && str_num.charAt(1) != '.' && str_num.length > 1) {
 			str_num = str_num.substr(1);
@@ -56,7 +47,7 @@
 			str_num = str_num.slice(0, -1);
 		}
 
-		return str_num;
+		return StringSymbol.set(str_num, str_symbol);
 	}
 
 	function find_index(arr, val) {
@@ -74,11 +65,23 @@
 		// 获取符号位，负为-1，正为1, 0返回0
 		get: function(str_num) {
 			str_num = String(str_num);
-			clear0(str_num);
 			if (str_num === '0') {
 				return 0;
 			}
 			return String(str_num).charAt(0) === '-' ? -1 : 1;
+		},
+		// 设置符号位
+		set: function(str_num, str_symbol) {
+			switch(str_symbol) {
+				case 0:
+					return '0';
+				case 1:
+					return str_num;
+				case -1:
+					return this.navigate(str_num);
+			}
+
+			return str_num;
 		},
 		// 清除符号位
 		clear: function(str_num) {
@@ -121,8 +124,10 @@
 
 			b = b || 0;
 
-			var origin_a = a = String(a);
-			var origin_b = b = String(b);
+			a = String(a);
+			b = String(b);
+			var origin_a = a;
+			var origin_b = b;
 
 
 			// 计算符号位
@@ -143,11 +148,11 @@
 			var carry = 0;
 			// 缓存结果
 			var buffer = '';
-			var i = 0;
+			var j = 0;
 			var length = Math.max(a.length, b.length);
-			while(i++ < length) {
-				var a_digit = a.charAt(a.length - i);
-				var b_digit = b.charAt(b.length - i);
+			while(j++ < length) {
+				var a_digit = a.charAt(a.length - j);
+				var b_digit = b.charAt(b.length - j);
 
 				if (a_digit == '.' && b_digit == '.') {
 					buffer = '.' + buffer;
@@ -200,8 +205,8 @@
 
 			b = b || 1;
 
-			var origin_a = a = String(a);
-			var origin_b = b = String(b);
+			a = String(a);
+			b = String(b);
 
 
 			// 计算符号位
@@ -216,8 +221,8 @@
 			if (decimal_length) {
 				a = pad_decimal(a, decimal_length);
 				b = pad_decimal(b, decimal_length);
-				a = a.split('.').join('');
-				b = b.split('.').join('');
+				a = clear_decimal_point(a);
+				b = clear_decimal_point(b);
 			}
 
 			// 所有位缓存结果数组
@@ -262,10 +267,7 @@
 				buffer = [buffer.substr(0, decimal_length * 2), buffer.substr(decimal_length * 2)].join('.');
 			}
 
-			if (a_symbol * b_symbol === -1) {
-				buffer = StringSymbol.navigate(buffer);
-			}
-
+			buffer = StringSymbol.set(buffer, a_symbol * b_symbol);
 			buffer = clear0(buffer);
 
 			return buffer;
@@ -285,8 +287,8 @@
 			b = b || 1;
 
 
-			var origin_a = a = String(a);
-			var origin_b = b = String(b);
+			a = String(a);
+			b = String(b);
 
 
 			// 计算符号位
@@ -301,13 +303,12 @@
 			if (decimal_length) {
 				a = pad_decimal(a, decimal_length);
 				b = pad_decimal(b, decimal_length);
-				a = a.split('.').join('');
-				b = b.split('.').join('');
+				a = clear_decimal_point(a);
+				b = clear_decimal_point(b);
 			}
 
 
 			// 下面是竖式计算
-			var b_lenth = b.length;
 			// 余数
 			var remain = '';
 			// 缓存
@@ -343,25 +344,25 @@
 				}
 
 				// 从0开始到9逐个尝试
-				for (var i = 0; i <= 9; i++) {
-					// 从小到大尝试，如果下一个值与b的乘积小于当前位的被除数，则商的当前位为i
-					var trial = this.multiply(i + 1, b);
+				for (var j = 0; j <= 9; j++) {
+					// 从小到大尝试，如果下一个值与b的乘积小于当前位的被除数，则商的当前位为j
+					var trial = this.multiply(j + 1, b);
 					if (this.gt(trial, a_digit)) {
-						buffer += i;
+						buffer += j;
 						// 求余数
-						remain = this.subtract(a_digit, this.multiply(i, b));
+						remain = this.subtract(a_digit, this.multiply(j, b));
 						break;
 					}
 				}
 
-				if (w -- <= 0) {
+				if (w-- <= 0) {
 					break;
 				}
 			}
 
 			// 把此次计算的整数位的商和余公布出去
-			this._divide_remain = clear0(int_remain);
-			this._divide_int_result = clear0(int_buffer);
+			this._divide_remain = StringSymbol.set(clear0(int_remain), a_symbol * b_symbol);
+			this._divide_int_result = StringSymbol.set(clear0(int_buffer), a_symbol * b_symbol);
 
 			// 四舍五入
 			return this.toFixed(buffer, this.DIVIDE_DECIMAL_LIMIT);
@@ -393,7 +394,7 @@
 			return StringSymbol.get(this.subtract(a, b)) <= 0;
 		},
 		// 最大值
-		max: function(a) {
+		max: function(a, b) {
 			if (arguments.length > 2) {
 				var ret = a;
 				for (var i = 1; i < arguments.length; i++) {
@@ -405,7 +406,7 @@
 			return this.gte(a, b) ? String(a) : String(b);
 		},
 		// 最小值
-		min: function(a) {
+		min: function(a, b) {
 			if (arguments.length > 2) {
 				var ret = a;
 				for (var i = 1; i < arguments.length; i++) {
@@ -495,17 +496,16 @@
 			do {
 				this.divide(str_num, radix);
 				str_num = this._divide_int_result;
-				var dec_digit = this._divide_remain;
-				var sys_digit = this.CHAR_MAP.charAt(dec_digit);
-				ret = sys_digit + ret;
+				var digit = this._divide_remain;
+				if (digit != '.') {
+					digit = this.CHAR_MAP.charAt(digit);
+				}
+				ret = digit + ret;
 				
 			} while (!this.eq(str_num, 0));
 
 
-			if (str_symbol === -1) {
-				ret = this.navigate(ret);
-			}
-
+			ret = StringSymbol.set(ret, str_symbol);
 			return clear0(ret);
 		},
 		// 转2进制
@@ -520,13 +520,24 @@
 		hex: function(str_num) {
 			return this.system(str_num, 16);
 		},
-		// 36进制转10进制
+		// 其它进制转10进制
 		dec: function(str_num, radix) {
 			str_num = String(str_num);
+		
+			//  处理符号
+			var str_symbol = StringSymbol.get(str_num);
+			str_num = StringSymbol.clear(str_num);
+
+			// 处理小数
+			var decimal_length = get_decimal_length(str_num);
+			if (decimal_length) {
+				str_num = clear_decimal_point(str_num);
+			}
+
 			var ret = '';
 			for (var i = 0 ; i < str_num.length; i++) {
 				var digit_sys = str_num.charAt(i);
-				var digit_dec = find_index(CHAR_MAP, digit_sys);
+				var digit_dec = find_index(this.CHAR_MAP, digit_sys);
 
 				if (digit_dec === -1) {
 					break;
@@ -535,7 +546,13 @@
 				ret = this.plus(ret, this.multiply(digit_dec, this.pow(radix, str_num.length - i - 1)));
 			}
 
-			return ret;
+			// 处理小数
+			if (decimal_length) {
+				ret = this.divide(ret, Math.pow(radix, decimal_length));
+			}
+
+			ret = StringSymbol.set(ret, str_symbol);
+			return clear0(ret);
 		}
 	}
 

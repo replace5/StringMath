@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+</head>
+<body>
+	<script src="StringMath.js"></script>
+	<script>
+	console.time();
+	for (var i = 0; i < 1000; i++) {
+		StringMath.pow(32, 20);
+	}
+	console.timeEnd();
+	</script>
+</body>
+</html>

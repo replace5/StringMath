@@ -120,9 +120,9 @@ StringMath.pow('2137489127897541278789.332', '3323');
 ```
 ### system
 Convert the decimal StringNumber to other system, like Number.prototype.toString(radix)
-Allow two parameters, first is StringNumber, second is the target system to convert (less than 32);
+Allow two parameters, first is StringNumber, second is the target system to convert (less than 36);
 ``` javascript
-StringMath.system('2137489127897541278789', 32);
+StringMath.system('2137489127897541278789', 36);
 ```
 
 ### bin
@@ -147,8 +147,8 @@ StringMath.hex('2137489127897541278789');
 ```
 
 ### dec
-Convert the other system StringNumber to decimal system, like parseInt(Number, radix)
-Allow two parameters, first is StringNumber, second is the origin system (less than 32);
+Convert the other system StringNumber to decimal system, like parseFloat(Number, radix)
+Allow two parameters, first is StringNumber, second is the origin system (less than 36);
 ``` javascript
-StringMath.dec('2137489127897541278789', 32);
+StringMath.dec('2137489127897541278789', 36);
 ```
