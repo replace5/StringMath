@@ -5,7 +5,7 @@ A javascript library that calculate the big number(Even greater than 2^53);
 ## parameter and return
 Allow input number or string(we can call it StringNumber, number represented by a string, RegExp: /^\+\-\w+$/), it should be noted that the maximum number of JS security is Math.pow(2, 53) - 1, function all return string(StringNumber);
 
-##Use
+## Use
 ### plus (+)
 Allow at least one parameter;
 ``` javascript
